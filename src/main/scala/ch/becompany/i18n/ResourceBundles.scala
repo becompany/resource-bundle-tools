@@ -37,7 +37,7 @@ object Resource {
     }
 }
 
-case class ResourceBundle(resources: Seq[Resource]) {
+case class ResourceBundle(dir: Path, name: String, resources: Seq[Resource]) {
   
   lazy val locales = resources.map(_.locale).toSet
   
@@ -67,7 +67,6 @@ object ResourceBundles {
      allPaths(cwd).toSeq.
        flatMap(Resource(_)).
        groupBy(r => (r.dir, r.name)).
-       values.
-       map(ResourceBundle(_))
+       map { case (key, resources) => ResourceBundle(key._1, key._2, resources) }
   
 }

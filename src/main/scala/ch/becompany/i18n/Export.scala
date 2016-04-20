@@ -22,14 +22,16 @@ import com.norbitltd.spoiwo.model.Width
 import com.norbitltd.spoiwo.model.WidthUnit._
 
 object Export extends App {
-  
-  val columnWidth = new Width(30, Character)
-  
+
+  val headerStyle = CellStyle(font = Font(bold = true))
+
+  val keyStyle = CellStyle(font = Font(italic = true))
+
   val missingValueStyle = CellStyle(
-      fillForegroundColor = Color(255, 200, 200),
+      fillForegroundColor = Color(255, 230, 230),
       fillPattern = CellFill.Solid
   )
-  
+
   import ResourceBundles._
   
   def formatDate(d: Calendar) =
@@ -38,12 +40,15 @@ object Export extends App {
   def spreadsheet(name: String, bundles: Map[ResourceBundle, Map[String, Map[Locale, String]]]) = {
     val locales = bundles.keys.map(_.locales).flatten.toList
     
-    val headers = "Key" :: locales.map(_.toLanguageTag.toUpperCase).toList
+    val headers = "Bundle" :: "Key" :: locales.map(_.toLanguageTag.toUpperCase).toList
     val columns = headers.zipWithIndex.map { case (header, i) =>
-      Column(index = i, width = columnWidth)
+      Column(index = i, width = new Width(i match {
+        case 0 => 20 // Bundle
+        case 1 => 30 // Key
+        case _ => 40 // Messages
+      }, Character))
     }
     
-    val headerStyle = CellStyle(font = Font(bold = true))
     val headerRow = Row(style = headerStyle).withCellValues(headers)
 
     def cell(value: Option[String]) = value match {
@@ -52,10 +57,13 @@ object Export extends App {
     }
     
     val rows = for {
-      (bundle, values) <- bundles
-      (key, localeValues) <- values
+      (bundle, values) <- bundles.toSeq.sortBy(_._1.name)
+      (key, localeValues) <- values.toSeq.sortBy(_._1)
     } yield {
-      Row().withCells(Cell(key) :: locales.map(localeValues.get(_)).map(cell))
+      Row().withCells(
+          Cell(bundle.name, style = keyStyle) ::
+          Cell(key, style = keyStyle) ::
+          locales.map(localeValues.get(_)).map(cell))
     }
 
     val sheet = Sheet(name = name).
