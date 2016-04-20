@@ -25,6 +25,11 @@ object Export extends App {
   
   val columnWidth = new Width(30, Character)
   
+  val missingValueStyle = CellStyle(
+      fillForegroundColor = Color(255, 200, 200),
+      fillPattern = CellFill.Solid
+  )
+  
   import ResourceBundles._
   
   def formatDate(d: Calendar) =
@@ -41,7 +46,6 @@ object Export extends App {
     val headerStyle = CellStyle(font = Font(bold = true))
     val headerRow = Row(style = headerStyle).withCellValues(headers)
 
-    val missingValueStyle = CellStyle(fillForegroundColor = Color.LightCoral, fillPattern = CellFill.Solid)
     def cell(value: Option[String]) = value match {
       case Some(s) => Cell(s)
       case None => Cell(style = missingValueStyle, value = "")
