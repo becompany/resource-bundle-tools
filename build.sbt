@@ -6,10 +6,10 @@ resolvers ++= Seq(
 )
 
 lazy val restClient = (
-  Project("i18n", file("."))
+  Project("resource-bundle-tools", file("."))
   settings(
-    organization := "ch.post",
-    name := "pcc-i18n",
+    organization := "ch.becompany",
+    name := "resource-bundle-tools",
     version := "1.0.0-SNAPSHOT",
     scalaVersion := "2.11.7",
     libraryDependencies ++= dependencies

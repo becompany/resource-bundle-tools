@@ -39,7 +39,7 @@ object Export extends App {
 
     val missingValueStyle = CellStyle(fillForegroundColor = Color.LightCoral, fillPattern = CellFill.Solid)
     def cell(value: Option[String]) = value match {
-      case Some(s) => Cell("[" + s + "]")
+      case Some(s) => Cell(s)
       case None => Cell(style = missingValueStyle, value = "")
     }
     
