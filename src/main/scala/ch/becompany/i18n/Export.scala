@@ -18,8 +18,12 @@ import com.norbitltd.spoiwo.model.Color
 import sys.process._
 import org.apache.poi.ss.usermodel.FillPatternType
 import com.norbitltd.spoiwo.model.enums.CellFill
+import com.norbitltd.spoiwo.model.Width
+import com.norbitltd.spoiwo.model.WidthUnit._
 
 object Export extends App {
+  
+  val columnWidth = new Width(30, Character)
   
   import ResourceBundles._
   
@@ -27,11 +31,11 @@ object Export extends App {
     new SimpleDateFormat("yyyy-MM-dd-HHmm").format(d.getTime)
   
   def spreadsheet(name: String, bundles: Map[ResourceBundle, Map[String, Map[Locale, String]]]) = {
-    val locales = bundles.keys.map(_.locales).flatten
+    val locales = bundles.keys.map(_.locales).flatten.toList
     
     val headers = "Key" :: locales.map(_.toLanguageTag.toUpperCase).toList
     val columns = headers.zipWithIndex.map { case (header, i) =>
-      Column(index = i, autoSized = true)
+      Column(index = i, width = columnWidth)
     }
     
     val headerStyle = CellStyle(font = Font(bold = true))
@@ -43,12 +47,13 @@ object Export extends App {
       case None => Cell(style = missingValueStyle, value = "")
     }
     
-    val rows = bundles flatMap { case (bundle, values) => {
-      values map { case (key, localeValues) => {
-        Row().withCells(Cell(key) :: locales.map(localeValues.get(_)).map(cell).toList)
-      }}
-    }}
-    
+    val rows = for {
+      (bundle, values) <- bundles
+      (key, localeValues) <- values
+    } yield {
+      Row().withCells(Cell(key) :: locales.map(localeValues.get(_)).map(cell))
+    }
+
     val sheet = Sheet(name = name).
       withColumns(columns).
       withRows(headerRow :: rows.toList)
@@ -66,20 +71,10 @@ object Export extends App {
     
     val name = s"Missing_Translations_$date"
     val sheet = spreadsheet(name, incompleteBundles)
-    val fileName = s"$name.xlsx"
+    val fileName = s"target/$name.xlsx"
     sheet.saveAsXlsx(fileName)
     println(s"Saved spreadsheet $fileName")
     s"open $fileName" !
-    /*
-    println(incompleteBundles.mkString("\n"))
-    all(path).foreach(bundle => {
-      println("=" * 40)
-      bundle.resources.foreach(r => {
-        println(r.dir + "/" + r.name + "_" + r.locale)
-        //println(r.properties.mkString("\n")))
-      })
-    })
-    */
   }
 
 }
