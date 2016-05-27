@@ -41,11 +41,11 @@ case class ResourceBundle(dir: Path, name: String, resources: Seq[Resource]) {
   
   lazy val locales = resources.map(_.locale).toSet
   
-  private lazy val keys = resources.map(_.properties.keys).flatten.toSet
-  
   private lazy val locale2resource = resources map (r => r.locale -> r) toMap
-  
-  private def values(key: String): Map[Locale, String] =
+
+  lazy val keys: Set[String] = resources.map(_.properties.keys).flatten.toSet
+
+  def values(key: String): Map[Locale, String] =
     resources.
       filter(_.properties.contains(key)).
       map(r => (r.locale, r.properties(key))).
@@ -59,8 +59,8 @@ case class ResourceBundle(dir: Path, name: String, resources: Seq[Resource]) {
 }
 
 object ResourceBundles {
-  
-  def allPaths(cwd: Path) =
+
+  private def allPaths(cwd: Path) =
     cwd ** "src" / "main" ** "*_*.properties"
   
   def all(cwd: Path): Iterable[ResourceBundle] =
