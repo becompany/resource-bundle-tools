@@ -6,6 +6,17 @@ Looks for resource bundles and generates a spreadsheet with missing translations
 
     sbt assembly
 
-## Run
+## Usage
 
-    ./i18n.sh <base-path>
+    Usage: i18n.sh [export|duplicate] <path>
+
+    Command: export
+    Export missing keys as spreadsheet.
+    
+    Command: duplicate [options]
+    List duplicate keys.
+      -v | --values
+            Output values
+    
+      <path>
+            Path to project
